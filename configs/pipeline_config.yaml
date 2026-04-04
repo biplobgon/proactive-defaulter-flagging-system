@@ -1,0 +1,81 @@
+# =============================================================================
+# pipeline_config.yaml
+# Orchestration settings for training and inference pipelines.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Training pipeline
+# ---------------------------------------------------------------------------
+training:
+  steps:
+    - data_validation
+    - feature_engineering
+    - train_baseline
+    - train_xgboost
+    - train_lightgbm
+    - calibrate_thresholds
+    - evaluate_all
+    - run_fairness_audit
+    - export_artifacts
+
+  # Re-use cached processed features if they exist
+  use_feature_cache: true
+  feature_cache_dir: data/processed/feature_cache
+
+  # Artefact output directories
+  model_dir: outputs/models
+  figure_dir: outputs/figures
+  report_dir: outputs/reports
+
+# ---------------------------------------------------------------------------
+# Inference pipeline
+# ---------------------------------------------------------------------------
+inference:
+  # Maximum latency budget per request (ms)
+  latency_budget_ms: 200
+
+  # Model artefact to load for real-time scoring
+  model_artifact: outputs/models/xgboost_default_model.pkl
+  scaler_artifact: outputs/models/feature_scaler.pkl
+  feature_columns_artifact: outputs/models/feature_columns.json
+
+  # Streamlit / HuggingFace Spaces
+  app:
+    host: 0.0.0.0
+    port: 7860
+
+# ---------------------------------------------------------------------------
+# Data validation thresholds
+# ---------------------------------------------------------------------------
+data_validation:
+  min_rows: 50000
+  max_missing_pct: 50.0          # columns above this are dropped
+  min_target_positive_rate: 0.05  # sanity check: at least 5% defaults
+
+# ---------------------------------------------------------------------------
+# Fairness audit
+# ---------------------------------------------------------------------------
+fairness:
+  protected_attributes:
+    - CODE_GENDER
+    - age_band          # derived: <30, 30-50, >50
+  parity_tolerance: 0.05   # max allowed Δ default rate across groups
+  report_path: outputs/reports/fairness_report.csv
+
+# ---------------------------------------------------------------------------
+# PSI (Population Stability Index) monitoring
+# ---------------------------------------------------------------------------
+psi:
+  n_bins: 10
+  warning_threshold: 0.1
+  critical_threshold: 0.25
+  reference_data: data/processed/psi_reference.csv
+  report_path: outputs/reports/psi_report.csv
+
+# ---------------------------------------------------------------------------
+# Experiment tracking (MLflow — optional)
+# ---------------------------------------------------------------------------
+mlflow:
+  enabled: false
+  tracking_uri: mlruns
+  experiment_name: proactive_defaulter_flagging

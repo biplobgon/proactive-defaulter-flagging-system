@@ -1,0 +1,102 @@
+# =============================================================================
+# model_config.yaml
+# Configuration for the proactive defaulter flagging pipeline.
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Global
+# ---------------------------------------------------------------------------
+seed: 42
+log_level: INFO
+
+# ---------------------------------------------------------------------------
+# Data paths (relative to project root)
+# ---------------------------------------------------------------------------
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  # Home Credit Default Risk tables
+  application_train: data/raw/application_train.csv
+  application_test: data/raw/application_test.csv
+  bureau: data/raw/bureau.csv
+  bureau_balance: data/raw/bureau_balance.csv
+  previous_application: data/raw/previous_application.csv
+  installments_payments: data/raw/installments_payments.csv
+  credit_card_balance: data/raw/credit_card_balance.csv
+  pos_cash_balance: data/raw/POS_CASH_balance.csv
+
+# ---------------------------------------------------------------------------
+# Feature engineering
+# ---------------------------------------------------------------------------
+features:
+  # Delinquency windows (days) for behavioral aggregation
+  delinquency_windows: [30, 60, 90]
+  # Minimum bureau records for a borrower to be included in bureau features
+  min_bureau_records: 1
+  # WOE encoding: minimum bin size as fraction of total rows
+  woe_min_bin_size: 0.05
+  # Maximum number of installment records to aggregate per applicant
+  max_installment_records: 1000
+  # Credit utilisation clipping (0-1 range, clip above this)
+  utilisation_clip: 1.5
+
+# ---------------------------------------------------------------------------
+# XGBoost Classifier
+# ---------------------------------------------------------------------------
+xgboost:
+  n_estimators: 500
+  learning_rate: 0.05
+  max_depth: 6
+  min_child_weight: 10
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  scale_pos_weight: 11          # ~11:1 class imbalance in Home Credit
+  eval_metric: auc
+  early_stopping_rounds: 50
+  use_label_encoder: false
+  verbosity: 0
+
+# ---------------------------------------------------------------------------
+# LightGBM (secondary model / ensemble member)
+# ---------------------------------------------------------------------------
+lightgbm:
+  n_estimators: 500
+  learning_rate: 0.05
+  num_leaves: 63
+  min_child_samples: 30
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  class_weight: balanced
+  verbosity: -1
+
+# ---------------------------------------------------------------------------
+# Traffic Light Thresholds
+# ---------------------------------------------------------------------------
+traffic_light:
+  # Risk probabilities (0-1) that define band boundaries
+  # Below red_threshold  → RED   (high risk)
+  # Between red and green → YELLOW (medium risk)
+  # Above green_threshold → GREEN  (low risk)
+  red_threshold: 0.40     # calibrated probability
+  green_threshold: 0.15
+  # Cost-benefit matrix for threshold optimisation
+  cost_false_positive: 100.0    # $ lost revenue per wrongly rejected applicant
+  cost_false_negative: 5000.0   # $ default loss per wrongly approved defaulter
+
+# ---------------------------------------------------------------------------
+# Evaluation metrics
+# ---------------------------------------------------------------------------
+evaluation:
+  primary_metric: roc_auc
+  secondary_metrics:
+    - average_precision
+    - gini_coefficient
+    - ks_statistic
+  n_cv_folds: 5
+  # Walk-forward validation: train on first N months, test on next M
+  time_split_column: months_since_application   # synthetic, derived from DAYS_BIRTH
+  test_size: 0.2

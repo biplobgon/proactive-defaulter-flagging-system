@@ -1,0 +1,63 @@
+# =============================================================================
+# .gitignore — Proactive Defaulter Flagging System
+# =============================================================================
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Data files (large; download via Kaggle CLI) ───────────────────────────────
+data/raw/
+data/processed/
+# Allow placeholder README files
+!data/raw/README.md
+!data/processed/README.md
+
+# ── Model artefacts (upload to HuggingFace Hub separately) ───────────────────
+outputs/models/*.pkl
+outputs/models/*.json
+outputs/models/*.bin
+# Allow README
+!outputs/models/README.md
+
+# ── Jupyter checkpoints ───────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── MLflow ────────────────────────────────────────────────────────────────────
+mlruns/
+mlartifacts/
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.local
+*.secret
+kaggle.json
+
+# ── OS / IDE ──────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Coverage / test artefacts ────────────────────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
