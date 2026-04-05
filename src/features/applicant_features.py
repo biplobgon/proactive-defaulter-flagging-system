@@ -127,7 +127,7 @@ def build_bureau_features(bureau: pd.DataFrame, bureau_balance: pd.DataFrame) ->
         bureau_dpd_max=("CREDIT_DAY_OVERDUE", "max"),
         bureau_credit_sum=("AMT_CREDIT_SUM", "sum"),
         bureau_debt_sum=("AMT_CREDIT_SUM_DEBT", "sum"),
-        bureau_enquiry_count=("AMT_REQ_CREDIT_BUREAU_YEAR", "sum"),
+        bureau_enquiry_count=("DAYS_CREDIT", "count"),
         bureau_bb_dpd_mean=("bb_dpd_mean", "mean"),
         bureau_bb_dpd_max=("bb_dpd_max", "max"),
     ).reset_index()
