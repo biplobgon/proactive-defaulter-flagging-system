@@ -34,8 +34,16 @@ def load_config(config_path: str | Path | None = None) -> Config:
 
     When *config_path* is None both configs are loaded relative to the
     project root (detected by locating the configs/ directory).
+
+    As a side-effect, the process working directory is changed to the
+    project root so that all relative paths in the config (e.g.
+    ``data/raw/application_train.csv``) resolve correctly regardless of
+    where the calling script or notebook is located.
     """
+    import os
+
     project_root = _find_project_root()
+    os.chdir(project_root)
 
     if config_path is not None:
         raw = _read_yaml(Path(config_path))

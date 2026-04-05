@@ -117,6 +117,13 @@ def run_data_prep(config_path: str | None = None) -> None:
     master.to_csv(out_path, index=False)
     log.info("Master features saved to %s", out_path)
 
+    # Also save to feature_cache for notebook / training pipeline consistency
+    cache_dir = Path(cfg.training.feature_cache_dir) if hasattr(cfg, "training") and hasattr(cfg.training, "feature_cache_dir") else processed_dir / "feature_cache"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_path = cache_dir / "master_features.csv"
+    master.to_csv(cache_path, index=False)
+    log.info("Master features also cached to %s", cache_path)
+
     # --- Summary stats ---
     summary = pd.DataFrame({
         "column": master.columns,

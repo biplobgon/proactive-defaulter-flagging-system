@@ -1,5 +1,5 @@
 # Hugging Face Spaces — Docker + Streamlit
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 # HF Spaces runs as non-root user (uid 1000)
 RUN useradd -m -u 1000 appuser

@@ -3,7 +3,7 @@
 > **Key Business Question:** *Who will likely default — and how early can we proactively flag them?*  
 > **Expected Impact:** Reduced credit risk, data-driven loan decisions, regulatory-compliant AI
 
-[![Python](https://img.shields.io/badge/Python-3.11-blue)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.14.3-blue)](https://www.python.org/)
 [![XGBoost](https://img.shields.io/badge/Model-XGBoost-orange)](https://xgboost.readthedocs.io/)
 [![Streamlit](https://img.shields.io/badge/Dashboard-Streamlit-red)](https://streamlit.io/)
 [![HuggingFace](https://img.shields.io/badge/Demo-HuggingFace%20Spaces-yellow)](https://huggingface.co/spaces/biplobgon/proactive-defaulter-flagging-system)
