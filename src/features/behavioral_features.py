@@ -47,7 +47,7 @@ def build_installment_features(inst: pd.DataFrame) -> pd.DataFrame:
 
     df = inst.copy()
     # Days paid early (negative) or late (positive) relative to the due date
-    df["days_late"] = df["DAYS_PAID_INSTALMENT"] - df["DAYS_INSTALMENT"]
+    df["days_late"] = df["DAYS_ENTRY_PAYMENT"] - df["DAYS_INSTALMENT"]
     df["payment_ratio"] = df["AMT_PAYMENT"] / df["AMT_INSTALMENT"].replace(0, np.nan)
 
     # --- Aggregate across all records per applicant ---
