@@ -77,12 +77,13 @@ lightgbm:
 # Traffic Light Thresholds
 # ---------------------------------------------------------------------------
 traffic_light:
-  # Risk probabilities (0-1) that define band boundaries
-  # Below red_threshold  → RED   (high risk)
-  # Between red and green → YELLOW (medium risk)
-  # Above green_threshold → GREEN  (low risk)
-  red_threshold: 0.40     # calibrated probability
-  green_threshold: 0.15
+  # Risk probabilities (0-1) that define band boundaries.
+  # Calibrated from actual val-set score distribution (NB03):
+  #   RED    >= red_threshold   = top 20% of applicants  (21.6% default rate)
+  #   YELLOW   between          = next 30%               ( 7.2% default rate)
+  #   GREEN  <= green_threshold = bottom 50%             ( 3.2% default rate)
+  red_threshold: 0.1231    # 80th percentile of val scores
+  green_threshold: 0.0517  # 50th percentile of val scores
   # Cost-benefit matrix for threshold optimisation
   cost_false_positive: 100.0    # $ lost revenue per wrongly rejected applicant
   cost_false_negative: 5000.0   # $ default loss per wrongly approved defaulter
@@ -100,3 +101,17 @@ evaluation:
   # Walk-forward validation: train on first N months, test on next M
   time_split_column: months_since_application   # synthetic, derived from DAYS_BIRTH
   test_size: 0.2
+
+# ---------------------------------------------------------------------------
+# Fairness audit
+# ---------------------------------------------------------------------------
+fairness:
+  # Maximum allowed demographic parity difference (absolute default-rate gap)
+  # before a group comparison is flagged as a FAIL.
+  parity_tolerance: 0.05
+  # 4/5ths (80%) disparate impact ratio threshold
+  min_disparate_impact: 0.80
+  # Protected attributes to audit
+  protected_attributes:
+    - CODE_GENDER
+    - age_band

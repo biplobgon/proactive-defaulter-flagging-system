@@ -1,0 +1,35 @@
+segment_type,segment_value,n,default_rate,default_rate_pct
+Traffic Light Band,GREEN,34392,0.029018376366596883,2.9
+Traffic Light Band,RED,4836,0.35504549214226633,35.5
+Traffic Light Band,YELLOW,10772,0.12170441886372076,12.17
+Income Type,Businessman,2,0.0,0.0
+Income Type,Commercial associate,11543,0.07485055878021311,7.49
+Income Type,Maternity leave,1,0.0,0.0
+Income Type,Pensioner,8920,0.05616591928251121,5.62
+Income Type,State servant,3513,0.05636208368915457,5.64
+Income Type,Student,5,0.0,0.0
+Income Type,Unemployed,6,0.3333333333333333,33.33
+Income Type,Working,26010,0.09461745482506728,9.46
+Occupation Type,Accountants,1621,0.0499691548426897,5.0
+Occupation Type,Cleaning staff,739,0.09201623815967523,9.2
+Occupation Type,Cooking staff,963,0.10488058151609553,10.49
+Occupation Type,Core staff,4434,0.05638249887235002,5.64
+Occupation Type,Drivers,3044,0.11103810775295664,11.1
+Occupation Type,HR staff,101,0.0891089108910891,8.91
+Occupation Type,High skill tech staff,1852,0.06371490280777538,6.37
+Occupation Type,IT staff,80,0.05,5.0
+Occupation Type,Laborers,8952,0.10277033065236818,10.28
+Occupation Type,Low-skill Laborers,357,0.17086834733893558,17.09
+Occupation Type,Managers,3489,0.06964746345657781,6.96
+Occupation Type,Medicine staff,1404,0.0754985754985755,7.55
+Occupation Type,Private service staff,447,0.08277404921700224,8.28
+Occupation Type,Realty agents,123,0.10569105691056911,10.57
+Occupation Type,Sales staff,5160,0.09534883720930233,9.53
+Occupation Type,Secretaries,212,0.04245283018867924,4.25
+Occupation Type,Security staff,1140,0.10964912280701754,10.96
+Occupation Type,Waiters/barmen staff,228,0.10964912280701754,10.96
+Age Band,<30,7335,0.11206543967280164,11.21
+Age Band,30-39,13424,0.09780989272943981,9.78
+Age Band,40-49,12495,0.07498999599839935,7.5
+Age Band,50-59,11021,0.06043008801379185,6.04
+Age Band,60+,5725,0.050305676855895196,5.03

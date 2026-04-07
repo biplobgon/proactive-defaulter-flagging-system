@@ -95,7 +95,10 @@ class KaplanMeierAnalyser:
 
         ax.set_xlabel("Months since loan origination", fontsize=12)
         ax.set_ylabel("Survival probability (no default)", fontsize=12)
-        ax.set_title("Kaplan-Meier Survival Curves by Risk Band", fontsize=14, fontweight="bold")
+        ax.set_title(
+            f"Kaplan-Meier Survival Curves by {self._group_col}",
+            fontsize=14, fontweight="bold"
+        )
         ax.legend(title=self._group_col, fontsize=10)
         ax.set_ylim(0, 1.05)
         ax.grid(alpha=0.3)

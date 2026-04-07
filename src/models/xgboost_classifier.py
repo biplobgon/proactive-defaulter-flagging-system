@@ -25,7 +25,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.calibration import CalibratedClassifierCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
@@ -46,7 +46,7 @@ class DefaultClassifier:
         self.cfg = cfg
         xgb_params = cfg.xgboost.to_dict() if hasattr(cfg.xgboost, "to_dict") else {}
         # Remove keys not accepted by XGBClassifier constructor
-        for key in ("early_stopping_rounds",):
+        for key in ("early_stopping_rounds", "use_label_encoder"):
             xgb_params.pop(key, None)
 
         self.model = XGBClassifier(
@@ -54,7 +54,7 @@ class DefaultClassifier:
             random_state=cfg.seed,
             n_jobs=-1,
         )
-        self.calibrated_model: CalibratedClassifierCV | None = None
+        self.calibrated_model: LogisticRegression | None = None  # Platt scaler
         self.scaler = StandardScaler()
         self.feature_columns: list[str] = []
 
@@ -81,20 +81,22 @@ class DefaultClassifier:
                  len(X_train), len(X_val))
 
         early_stopping = getattr(self.cfg.xgboost, "early_stopping_rounds", 50)
+        # XGBoost ≥2.0 requires early_stopping_rounds on the estimator, not fit()
+        if not getattr(self.model, 'early_stopping_rounds', None):
+            self.model.set_params(early_stopping_rounds=early_stopping)
         self.model.fit(
             X_train, y_train,
             eval_set=[(X_val, y_val)],
-            early_stopping_rounds=early_stopping,
             verbose=False,
         )
         log.info("Best iteration: %d", self.model.best_iteration)
 
         if calibrate:
             log.info("Calibrating probabilities with Platt scaling ...")
-            self.calibrated_model = CalibratedClassifierCV(
-                self.model, method="sigmoid", cv="prefit"
-            )
-            self.calibrated_model.fit(X_val, y_val)
+            # Manual Platt scaling: sigmoid LogisticRegression on val probabilities
+            raw_val = self.model.predict_proba(X_val)[:, 1].reshape(-1, 1)
+            self.calibrated_model = LogisticRegression()
+            self.calibrated_model.fit(raw_val, y_val)
 
         return self
 
@@ -104,8 +106,10 @@ class DefaultClassifier:
 
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
         """Return calibrated default probabilities (P(default=1))."""
-        predictor = self.calibrated_model if self.calibrated_model else self.model
-        return predictor.predict_proba(X[self.feature_columns])[:, 1]
+        raw = self.model.predict_proba(X[self.feature_columns])[:, 1]
+        if self.calibrated_model is not None:
+            raw = self.calibrated_model.predict_proba(raw.reshape(-1, 1))[:, 1]
+        return raw
 
     def predict_traffic_light(self, X: pd.DataFrame) -> pd.DataFrame:
         """Return a DataFrame with risk_score, risk_band for each row.
@@ -147,7 +151,9 @@ class DefaultClassifier:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        joblib.dump(self.calibrated_model or self.model, output_dir / "xgboost_default_model.pkl")
+        joblib.dump(self.model, output_dir / "xgboost_default_model.pkl")
+        if self.calibrated_model is not None:
+            joblib.dump(self.calibrated_model, output_dir / "platt_scaler.pkl")
         joblib.dump(self.scaler, output_dir / "feature_scaler.pkl")
         with open(output_dir / "feature_columns.json", "w") as fh:
             json.dump(self.feature_columns, fh)
@@ -160,8 +166,9 @@ class DefaultClassifier:
         output_dir = Path(output_dir)
         instance = cls.__new__(cls)
         instance.cfg = cfg
-        instance.calibrated_model = joblib.load(output_dir / "xgboost_default_model.pkl")
-        instance.model = None
+        instance.model = joblib.load(output_dir / "xgboost_default_model.pkl")
+        platt_path = output_dir / "platt_scaler.pkl"
+        instance.calibrated_model = joblib.load(platt_path) if platt_path.exists() else None
         instance.scaler = joblib.load(output_dir / "feature_scaler.pkl")
         with open(output_dir / "feature_columns.json") as fh:
             instance.feature_columns = json.load(fh)
